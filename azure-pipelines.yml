@@ -1,34 +1,35 @@
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
 trigger:
 - main
 
 pool:
-  # vmImage: 'ubuntu-latest'
+  # vmImage: ubuntu-latest
   name: "my Mac"
-
-variables:
-  javaVersion: '21'  
 
 steps:
 
-# Verify Java version
+# (Optional) Confirm JAVA_HOME is set correctly
 - script: |
-    echo "JAVA_HOME=$JAVA_HOME"
+    echo "JAVA_HOME = $JAVA_HOME"
     java -version
-  displayName: 'Show Java version'
+  displayName: 'Verify Java installation'
 
 # Step 1: Build with Maven
 - task: Maven@3
   inputs:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '$(javaVersion)'
-    jdkArchitectureOption: 'x64'
+    javaHomeOption: 'Path'
+    jdkDirectory: '/Library/Java/JavaVirtualMachines/jdk-22.jdk/Contents/Home' # Your JDK 22 path
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'clean package -DskipTests=true'
 
-# Step 2: Publish .jar as artifact
+# Step 2: Publish build artifact
 - task: CopyFiles@2
   inputs:
     contents: 'target/*.jar'
@@ -41,11 +42,18 @@ steps:
     publishLocation: 'Container'
 
 # Step 3: Deploy to Azure App Service
+# - task: AzureWebApp@1
+#   inputs:
+#     azureSubscription: 'azure-service-employee-api'  # Your service connection name
+#     appType: 'webAppLinux'
+#     appName: 'employee-apis'  # Your App Service name
+#     package: '$(Build.ArtifactStagingDirectory)/*.jar'
+#     runtimeStack: 'JAVA|21-java21'
+
 - task: AzureWebApp@1
   inputs:
-    azureSubscription: 'azure-service-employee-api'  # your service connection
+    azureSubscription: 'azure-service-employee-api'
     appType: 'webAppLinux'
-    appName: 'employee-apis'                         # your app name in Azure
-    package: '$(Build.ArtifactStagingDirectory)/*.jar'
+    appName: 'employee-apis'
+    package: '$(System.DefaultWorkingDirectory)/target/*.jar'
     runtimeStack: 'JAVA|21-java21'
-
