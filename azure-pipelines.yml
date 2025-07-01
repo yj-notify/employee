@@ -1,0 +1,50 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  javaVersion: '21'  
+
+steps:
+
+# Verify Java version
+- script: |
+    echo "JAVA_HOME=$JAVA_HOME"
+    java -version
+  displayName: 'Show Java version'
+
+# Step 1: Build with Maven
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '$(javaVersion)'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'clean package -DskipTests=true'
+
+# Step 2: Publish .jar as artifact
+- task: CopyFiles@2
+  inputs:
+    contents: 'target/*.jar'
+    targetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'springboot-jar'
+    publishLocation: 'Container'
+
+# Step 3: Deploy to Azure App Service
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'azure-service-employee-api'  # your service connection
+    appType: 'webAppLinux'
+    appName: 'employee-apis'                         # your app name in Azure
+    package: '$(Build.ArtifactStagingDirectory)/*.jar'
+    runtimeStack: 'JAVA|21-java21'
+
