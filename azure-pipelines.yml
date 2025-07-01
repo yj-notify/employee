@@ -2,7 +2,8 @@ trigger:
 - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  # vmImage: 'ubuntu-latest'
+  name: "my Mac"
 
 variables:
   javaVersion: '21'  
