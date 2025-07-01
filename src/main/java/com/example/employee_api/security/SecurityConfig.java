@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> {})
                 .headers(AbstractHttpConfigurer::disable // ✅ Disable all headers (advanced use — usually safe for H2 console only)
                 )
                 .httpBasic(Customizer.withDefaults())
