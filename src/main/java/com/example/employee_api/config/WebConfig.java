@@ -25,7 +25,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4200", "https://employee-management-system.azurewebsites.net")); // 👈 no wildcard
+        config.setAllowedOrigins(List.of("http://localhost:4200", "https://employee-management-system.azurewebsites.net","https://agreeable-sky-0cec8d300.1.azurestaticapps.net")); // 👈 no wildcard
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // 👈 required for Basic Auth
